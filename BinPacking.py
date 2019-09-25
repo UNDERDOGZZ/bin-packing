@@ -1,5 +1,6 @@
 from pprint import pprint
 from tkinter import *
+import os
 
 def read(filename):
     with open(filename) as f:
@@ -98,7 +99,7 @@ for i in range(len(datosRectangulos)):
 nodes = list()
 w.configure(background='black')
 w.pack()
-nodes.append(Node(planchaAncho, planchaAlto))  # Size of the packing area
+nodes.append(Node(planchaAncho, planchaAlto))  # area de empaquetado
 # nodes.append(Node(360, 260))
 ymax = 0
 
@@ -106,10 +107,10 @@ rectangulos.sort(key=lambda x: (x.alto * x.ancho), reverse=True)
 for rectangulo in rectangulos:
     nodes.sort(key=lambda x: x.y)
     for node in nodes:
-        if not rectangulo.ubicado:  # Check if the block hasn't been placed yet
-            if not rectangulo.encaja(node):  # If the block doesn't fit, try to flip it
+        if not rectangulo.ubicado:  # revisa si el rectangulo no ha sido ubicado
+            if not rectangulo.encaja(node):  # si no entra, gira
                 rectangulo.girar()
-            if rectangulo.encaja(node):  # Check if the block fits
+            if rectangulo.encaja(node):  # revisa si entra
                 score1 = rectangulo.tocandoBordes(nodes[0].ancho, nodes[0].alto)
                 rectangulo.girar()
                 score2 = rectangulo.tocandoBordes(nodes[0].ancho, nodes[0].alto)
@@ -119,7 +120,7 @@ for rectangulo in rectangulos:
                 if score1 > score2 or score1 == score2:
                     rectangulo.girar()
                 #node.draw()
-                rectangulo.dibujar() # Draw the block on the canvas
+                rectangulo.dibujar() # dibujar rectangulo
 
                 node_abajo, node_derecha = node.separar(rectangulo)
 
@@ -128,7 +129,28 @@ for rectangulo in rectangulos:
                 if node_derecha.ancho > 0 and node_derecha.alto > 0:
                     nodes.append(node_derecha)
                     #node.draw()
-            else:  # If the block still doesn't fit, flip it again
+            else:  # si no entra, vuelve a girar
                 rectangulo.girar()
         w.update()
+
+pprint(rectangulos)
+areas = 0.0
+areaTotal = planchaAncho*planchaAlto
+for i in range(len(rectangulos)):
+    if rectangulos[i].ubicado:
+        areas = areas + rectangulos[i].ancho*rectangulos[i].alto
+print ("Area total: ",areaTotal)
+print ("Area cubierta: ", areas)
+areaDesocupada = areaTotal-areas
+print ("Area no ocupada: ", areaDesocupada)
+desperdicio = (areaDesocupada/areaTotal)*100
+print ("Desperdicio: ", desperdicio,"%")
+
+file = open("/Users/ricardoguevara/Documents/Complejidad Algortimica/Bin-Packing/salida.txt", "w")
+file.write("Area total: "+str(areaTotal)+os.linesep)
+file.write("Area cubierta: "+str(areas)+os.linesep)
+file.write("Area no ocupada: "+str(areaTotal)+os.linesep)
+file.write("Desperdicio: "+str(desperdicio)+"%"+os.linesep)
+file.close()
+
 mainloop()
